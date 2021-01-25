@@ -8,10 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
+import javax.annotation.PostConstruct;
 import java.security.*;
-import java.security.cert.CertificateException;
 
 @Service
 public class JwtProvider {
@@ -21,6 +19,7 @@ public class JwtProvider {
     private final String KEY= "a9afdecd4e7246c9a056a95f35f2bb34";
     private JwtParser parser;
 
+    @PostConstruct
     public void init(){
 /*
         try {
@@ -36,8 +35,6 @@ public class JwtProvider {
 
     }
 
-
-
     public String generateToken(Authentication authentication){
 
         User principal = (User) authentication.getPrincipal();
@@ -49,6 +46,10 @@ public class JwtProvider {
                 .compact();
     }
 
+    /*
+
+
+    this for encryption, my case i'm only using hashing
 
     //NOT NEEDED FOR NOW
     private Key getPrivatekey() {
@@ -59,4 +60,21 @@ public class JwtProvider {
             throw new SpringRedditException("Exception occured when trying to read the from keystore");
         }
     }
+
+    //NOT NEEDED FOR NOW
+    private Key getPublicKey(){
+
+    }
+*/
+
+    public boolean validateToken(String jwt){
+
+        try {
+            parser.parseClaimsJwt(jwt);
+        }catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
 }
