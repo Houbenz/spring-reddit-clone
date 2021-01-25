@@ -20,8 +20,16 @@ public class AuthController {
     public ResponseEntity<String> signUp(@RequestBody RegisterRequest registerRequest){
 
         authService.signUp(registerRequest);
-        return new ResponseEntity<>("User Registration Succesful", HttpStatus.OK);
+        return new ResponseEntity<>("User Registration Successful", HttpStatus.OK);
     }
+
+
+    @GetMapping("accountVerification/{token}")
+    public ResponseEntity<String> verifiyAccount(@PathVariable String token){
+        authService.verifyAccount(token);
+        return new ResponseEntity<String>("Account activated !",HttpStatus.OK);
+    }
+
 
     @GetMapping("/test")
     public String test(){
