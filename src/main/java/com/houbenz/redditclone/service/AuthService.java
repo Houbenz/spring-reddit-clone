@@ -2,12 +2,19 @@ package com.houbenz.redditclone.service;
 
 import com.houbenz.redditclone.Repository.UserRepository;
 import com.houbenz.redditclone.Repository.VerificationTokenRepository;
+import com.houbenz.redditclone.dto.AuthenticationResponse;
+import com.houbenz.redditclone.dto.LoginRequest;
 import com.houbenz.redditclone.dto.RegisterRequest;
 import com.houbenz.redditclone.exception.SpringRedditException;
 import com.houbenz.redditclone.model.NotificationEmail;
 import com.houbenz.redditclone.model.User;
 import com.houbenz.redditclone.model.VerificationToken;
+import com.houbenz.redditclone.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +32,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signUp(RegisterRequest registerRequest){
@@ -70,5 +79,17 @@ public class AuthService {
         User user = userRepository.findByUsername(username).orElseThrow(() ->  new SpringRedditException("User not found with name : "+username));
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String jwtToken =jwtProvider.generateToken(authenticate);
+
+        return new AuthenticationResponse(jwtToken,loginRequest.getUsername());
+
     }
 }
