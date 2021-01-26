@@ -1,6 +1,7 @@
 package com.houbenz.redditclone.security;
 
 import com.houbenz.redditclone.exception.SpringRedditException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,6 +17,7 @@ public class JwtProvider {
 
 
     private KeyStore keyStore;
+    //MUST HIDDEN (its available only because of tests)
     private final String KEY= "a9afdecd4e7246c9a056a95f35f2bb34";
     private JwtParser parser;
 
@@ -46,6 +48,25 @@ public class JwtProvider {
                 .compact();
     }
 
+
+    public boolean validateToken(String jwt){
+
+        try {
+            parser.parseClaimsJws(jwt);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new SpringRedditException("jwt exception "+e.getMessage());
+        }
+    }
+
+
+    public String getUsernameByJwt(String token){
+        Claims claims = parser.parseClaimsJws(token).getBody();
+
+        return claims.getSubject();
+    }
+
     /*
 
 
@@ -67,14 +88,6 @@ public class JwtProvider {
     }
 */
 
-    public boolean validateToken(String jwt){
 
-        try {
-            parser.parseClaimsJwt(jwt);
-        }catch (Exception e){
-            return false;
-        }
-        return true;
-    }
 
 }
